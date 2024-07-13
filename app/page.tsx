@@ -1,10 +1,19 @@
-import { ModeToggle } from "@/components/ModeToggle";
+import FeaturesSection from "@/components/FeaturesSection";
+import {FooterSection} from "@/components/FooterSection";
+import HeroSection from "@/components/HeroSection";
+import { Navbar } from "@/components/Navbar";
+import PricingSection from "@/components/PricingSection";
+import TestimonialSection from "@/components/TestimonialSection";
 
 export default function Home() {
   return (
     <>
-      <ModeToggle />
-      <h1>Hello</h1>
+      <Navbar />
+      <HeroSection />
+      <FeaturesSection />
+      <TestimonialSection />
+      <PricingSection />
+      <FooterSection />
     </>
   );
 }
