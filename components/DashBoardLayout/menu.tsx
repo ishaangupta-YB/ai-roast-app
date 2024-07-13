@@ -36,6 +36,7 @@ export function Menu({ isOpen }: MenuProps) {
   // if (!isLoaded) {
   //   return <div>Loading...</div>;
   // }
+  
   const pathname = usePathname();
   const menuList = getMenuList(pathname, !!isSignedIn);
 
