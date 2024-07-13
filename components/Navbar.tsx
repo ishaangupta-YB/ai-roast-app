@@ -28,16 +28,11 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ModeToggle } from "./ModeToggle";
+import { featureList } from "@/lib/feature-list";
 
 interface RouteProps {
   href: string;
   label: string;
-}
-
-interface FeatureProps {
-  title: string;
-  description: string;
-  href: string;
 }
 
 const routeList: RouteProps[] = [
@@ -50,50 +45,21 @@ const routeList: RouteProps[] = [
     label: "Testimonials",
   },
   {
-    href: "#team",
-    label: "Team",
-  },
-  {
-    href: "#contact",
-    label: "Contact",
+    href: "#pricing",
+    label: "Pricing",
   },
   {
     href: "#faq",
     label: "FAQ",
   },
 ];
-const featureList: FeatureProps[] = [
-  {
-    title: "Roast LinkedIn",
-    description:
-      "Get a professional roast of your LinkedIn profile. Impress with your wit!",
-    href: "/dashboard/linkedin-roast",
-  },
-  {
-    title: "Roast GitHub",
-    description:
-      "Roast your GitHub repos and coding skills. Show off your humorous side!",
-    href: "/dashboard/github-roast",
-  },
-  {
-    title: "Roast Resume",
-    description:
-      "Have your resume roasted for a hilarious critique. Perfect for a laugh!",
-    href: "/dashboard/resume-roast",
-  },
-  {
-    title: "Roast LeetCode",
-    description:
-      "Get your LeetCode solutions roasted. Coding fun with a twist!",
-    href: "/dashboard/leetcode-roast",
-  },
-  {
-    title: "Roast Reddit",
-    description:
-      "Roast your Reddit posts. Let’s see how you fare in the roast battleground!",
-    href: "/dashboard/reddit-roast",
-  },
-];
+
+const handleScroll = (href: string) => {
+  const element = document.querySelector(href);
+  if (element) {
+    element.scrollIntoView({ behavior: "smooth" });
+  }
+};
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -134,7 +100,7 @@ export const Navbar = () => {
                 {routeList.map(({ href, label }) => (
                   <Button
                     key={href}
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {setIsOpen(false); handleScroll(href);}}
                     asChild
                     variant="ghost"
                     className="justify-start text-base"
@@ -145,25 +111,21 @@ export const Navbar = () => {
               </div>
             </div>
 
-            <SheetFooter className="flex-col sm:flex-col justify-start items-start">
-              <Separator className="mb-2" />
-
-              <div>
-                <ModeToggle />
-                <div className="px-3">
-                  <SignedOut>
-                    <Button className="bg-white rounded-xl px-4 py-2 font-bold border border-black ">
-                      <Link href="/sign-up">SignUp</Link>
-                    </Button>
-                  </SignedOut>
-                  <SignedIn>
-                    <SignOutButton>
-                      <button className="bg-red-500 px-4 py-2 rounded">
-                        Logout
-                      </button>
-                    </SignOutButton>
-                  </SignedIn>
-                </div>
+            <SheetFooter className="flex flex-row items-center justify-between px-4">
+              <ModeToggle />
+              <div className="px-3 flex items-center">
+                <SignedOut>
+                  <Button className="bg-white rounded-xl px-4 py-2 font-bold border border-black mr-2">
+                    <Link href="/sign-up">SignUp</Link>
+                  </Button>
+                </SignedOut>
+                <SignedIn>
+                  <SignOutButton>
+                    <button className="bg-red-500 px-4 py-2 rounded">
+                      Logout
+                    </button>
+                  </SignOutButton>
+                </SignedIn>
               </div>
             </SheetFooter>
           </SheetContent>
@@ -215,8 +177,8 @@ export const Navbar = () => {
               }
               return (
                 <NavigationMenuLink key={href} asChild>
-                  <Link href={href} className="text-base px-2">
-                    {label}
+                  <Link href={href} onClick={() => handleScroll(href)} className="text-base px-2" scroll={false}>
+                  {label}
                   </Link>
                 </NavigationMenuLink>
               );
