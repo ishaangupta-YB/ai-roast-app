@@ -2,7 +2,7 @@ import { Linkedin, Github, FileText, LucideIcon } from "lucide-react";
 import { SiLeetcode } from "react-icons/si";
 import { IconType } from "react-icons";
 import { FaRedditAlien } from "react-icons/fa";
-type CustomIconType = LucideIcon | IconType;
+export type CustomIconType = LucideIcon | IconType;
 
 interface FeatureProps {
   title: string;
