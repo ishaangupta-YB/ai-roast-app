@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { ContentLayout } from "@/components/DashBoardLayout/content-layout";
+import LeetcodeRoast from "@/components/LeetcodeRoast";
 
 export default function Page() {
   return (
@@ -31,7 +32,8 @@ export default function Page() {
             <BreadcrumbPage>Leetcode</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
-      </Breadcrumb> 
+      </Breadcrumb>  
+      <LeetcodeRoast/>
     </ContentLayout>
   );
 }
