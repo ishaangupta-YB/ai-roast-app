@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { readStreamableValue } from 'ai/rsc';
-import { generate } from '@/lib/actions';
+import { generate } from '@/lib/openai/actions';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;

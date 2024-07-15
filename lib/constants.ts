@@ -1,3 +1,15 @@
+type HarmCategory =
+  | "HARM_CATEGORY_HARASSMENT"
+  | "HARM_CATEGORY_HATE_SPEECH"
+  | "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+  | "HARM_CATEGORY_DANGEROUS_CONTENT";
+type HarmBlockThreshold =
+  | "HARM_BLOCK_THRESHOLD_UNSPECIFIED"
+  | "BLOCK_LOW_AND_ABOVE"
+  | "BLOCK_MEDIUM_AND_ABOVE"
+  | "BLOCK_ONLY_HIGH"
+  | "BLOCK_NONE";
+
 export enum Tones {
   SoftHearted = "soft-hearted",
   HardHearted = "hard-hearted",
@@ -6,12 +18,15 @@ export enum Tones {
   Vulgar = "vulgar",
 }
 
-// export const safetySettings = [
-//   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-//   { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-//   { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-//   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-// ];
+export const safetySettings: Array<{
+  category: HarmCategory;
+  threshold: HarmBlockThreshold;
+}> = [
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+];
 
 export enum Roles {
   Memer = "Memer",
@@ -37,4 +52,5 @@ export const constants = {
   Tones,
   Roles,
   Languages,
+  safetySettings,
 };
