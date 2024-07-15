@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { constants } from "@/lib/constants";
 import axios from "axios";
-
 import {
   Select,
   SelectContent,
@@ -14,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "../ui/textarea";
-import getPromptHelper from "@/lib/github-roast/promptHelper";
+import getLeetcodePromptHelper from "@/lib/leetcode-roast/promptHelper";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -25,27 +24,15 @@ import { MultiStepLoader } from "../ui/multi-step-loader";
 import { HoverBorderGradient } from "../ui/hover-border-gradient";
 
 const loadingStates = [
-  {
-    text: "Fetching GitHub data...",
-  },
-  {
-    text: "Generating roast...",
-  },
-  {
-    text: "Crafting witty insults...",
-  },
-  {
-    text: "Almost ready to roast...",
-  },
-  {
-    text: "Almost done...",
-  },
-  {
-    text: "Brace yourself...",
-  },
+  { text: "Fetching LeetCode data..." },
+  { text: "Generating roast..." },
+  { text: "Crafting witty insults..." },
+  { text: "Almost ready to roast..." },
+  { text: "Almost done..." },
+  { text: "Brace yourself..." },
 ];
 
-export default function GithubRoast() {
+export default function LeetcodeRoast() {
   const [username, setUsername] = useState("");
   const [roastTone, setRoastTone] = useState(constants.Tones.SoftHearted);
   const [roleType, setRoleType] = useState(constants.Roles.Memer);
@@ -58,7 +45,7 @@ export default function GithubRoast() {
 
   useEffect(() => {
     if (roastResponse) {
-      setLoading(() => {return false});
+      setLoading(false);
     }
   }, [roastResponse]);
 
@@ -68,17 +55,19 @@ export default function GithubRoast() {
     setProfileUrl("");
     setAvatarUrl("");
     try {
-      const githubData = await fetchGithubData(username);
-      const prompt = getPromptHelper(
+      const leetcodeData = await fetchLeetcodeData(username);
+      const prompt = getLeetcodePromptHelper(
         roastTone,
         roleType,
-        githubData,
+        leetcodeData,
         languageType
       );
-      setProfileUrl(githubData?.html_url);
-      setAvatarUrl(githubData?.avatar_url);
+      console.log(prompt)
+      setProfileUrl(`https://leetcode.com/u/${username}/`);
+      setAvatarUrl(leetcodeData.profile.avatar);
       await fetchOpenAIResponse(prompt);
     } catch (error) {
+        console.log(error)
       toast({
         variant: "destructive",
         title: "Invalid user",
@@ -90,11 +79,13 @@ export default function GithubRoast() {
     }
   };
 
-  const fetchGithubData = async (username: string) => {
+  const fetchLeetcodeData = async (username: string) => {
     try {
-      const response = await axios.get(`/api/github-data?username=${username}`);
+      const response = await axios.get(
+        `/api/leetcode-data?username=${username}`
+      );
       if (!response) throw new Error("Some error occurred");
-      if (response.status == 404) {
+      if (response.status === 404) {
         throw new Error("Invalid user");
       } else if (response.status !== 200) {
         throw new Error("Some error occurred");
@@ -114,8 +105,6 @@ export default function GithubRoast() {
     for await (const delta of readStreamableValue(output)) {
       setRoastResponse((currentGeneration) => `${currentGeneration}${delta}`);
     }
-    // const { output } = await generate(prompt);
-    // setRoastResponse(output)
   };
 
   return (
@@ -126,9 +115,9 @@ export default function GithubRoast() {
         duration={2000}
       />
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">Roast Your GitHub Profile</h2>
+        <h2 className="text-2xl font-bold">Roast Your LeetCode Profile</h2>
         <p className="text-muted-foreground mt-2">
-          Enter a GitHub username and select the roast options below.
+          Enter a LeetCode username and select the roast options below.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -136,7 +125,7 @@ export default function GithubRoast() {
           <Input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter GitHub username"
+            placeholder="Enter LeetCode username"
           />
         </div>
         <div className="col-span-1">
@@ -193,9 +182,6 @@ export default function GithubRoast() {
           </Select>
         </div>
       </div>
-      {/* <Button onClick={handleRoast} disabled={loading}>
-        {loading ? "Loading..." : "Roast"}
-      </Button> */}
       <HoverBorderGradient
         onClick={handleRoast}
         aria-disabled={loading}

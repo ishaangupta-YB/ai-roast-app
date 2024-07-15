@@ -45,7 +45,7 @@ export enum Roles {
 export enum Languages {
   English = "English",
   Hindi = "Hindi",
-  BothHindiAndEnglish = "Both Hindi and English",
+  BothEnglishAndHindi = "Both English and Hindi",
 }
 
 export const constants = {

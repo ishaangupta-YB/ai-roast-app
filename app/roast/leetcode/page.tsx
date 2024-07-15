@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { ContentLayout } from "@/components/DashBoardLayout/content-layout";
-import LeetcodeRoast from "@/components/LeetcodeRoast";
+import LeetcodeRoast from "@/components/roast-components/LeetcodeRoast";
 
 export default function Page() {
   return (

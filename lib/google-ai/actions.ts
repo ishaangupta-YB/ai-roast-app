@@ -1,7 +1,7 @@
 "use server";
 
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { generateText, streamText } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { safetySettings } from "../constants";
 
@@ -10,17 +10,17 @@ export async function generate(prompt: string) {
 
   const stream = createStreamableValue();
   const model = google("models/gemini-pro", {
-    safetySettings: safetySettings,     
+    safetySettings: safetySettings,
   });
 
   (async () => {
     const { textStream } = await streamText({
       model: model,
       temperature: 1,
-      topP: 0.95, 
+      topP: 0.95,
       prompt: prompt,
     });
-
+    
     for await (const text of textStream) {
       stream.update(text);
     }
