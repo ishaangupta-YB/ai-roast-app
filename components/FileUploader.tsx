@@ -20,8 +20,10 @@ const PdfColor = {
 
 export default function FileUpload({
   onFileUpload,
+  setParsedText,
 }: {
   onFileUpload: (file: File) => void;
+  setParsedText: (text: string) => void;
 }) {
   const [filesToUpload, setFilesToUpload] = useState<FileUploadProgress[]>([]);
   const { toast } = useToast();
@@ -43,6 +45,31 @@ export default function FileUpload({
     });
   };
 
+  const uploadFileToApi = async (file: File) => {
+    const formData = new FormData();
+    formData.append("filepond", file);
+    
+    try {
+      const response = await fetch("/api/resume-data", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      const parsedText = await response.text();
+      setParsedText(parsedText);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: (error as Error).message,
+      });
+    }
+  };
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 1) {
@@ -57,11 +84,7 @@ export default function FileUpload({
       const file = acceptedFiles[0]; 
       setFilesToUpload([{ file, progress: 100 }]); 
       onFileUpload(file);
-      // toast({
-      //   variant: "default",
-      //   title: "File Uploaded",
-      //   description: `${file.name} has been uploaded successfully.`,
-      // });
+      await uploadFileToApi(file); 
     },
     [onFileUpload]
   );

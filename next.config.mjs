@@ -10,9 +10,10 @@ const nextConfig = {
             },
         ],
     },
-    experimental: {
+    experimental: { 
         serverComponentsExternalPackages: ['pdf2json'],
     },
+    swcMinify:true
 };
 
 export default nextConfig;

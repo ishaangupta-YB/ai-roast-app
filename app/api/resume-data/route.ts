@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'; // To handle the request and response
-import { promises as fs } from 'fs'; // To save the file temporarily
-import { v4 as uuidv4 } from 'uuid'; // To generate a unique filename
-import PDFParser from 'pdf2json'; // To parse the pdf
+import { NextRequest, NextResponse } from "next/server"; // To handle the request and response
+import { promises as fs } from "fs"; // To save the file temporarily
+import { v4 as uuidv4 } from "uuid"; // To generate a unique filename
+import PDFParser from "pdf2json"; // To parse the pdf
 
 export async function POST(req: NextRequest) {
   const formData: FormData = await req.formData();
-  const uploadedFiles = formData.getAll('filepond');
-  let fileName = '';
-  let parsedText = '';
+  const uploadedFiles = formData.getAll("filepond");
+  let fileName = "";
+  let parsedText = "";
 
   if (uploadedFiles && uploadedFiles.length > 0) {
-    const uploadedFile = uploadedFiles[1];
+    const uploadedFile = uploadedFiles[0];
     // console.log('Uploaded file:', uploadedFile);
 
     // Check if uploadedFile is of type File
@@ -37,25 +37,33 @@ export async function POST(req: NextRequest) {
       const pdfParser = new (PDFParser as any)(null, 1);
 
       // See pdf2json docs for more info on how the below works.
-      pdfParser.on('pdfParser_dataError', (errData: any) =>
+      pdfParser.on("pdfParser_dataError", (errData: any) =>
         console.log(errData.parserError)
       );
 
-      pdfParser.on('pdfParser_dataReady', () => {
+      pdfParser.on("pdfParser_dataReady", () => {
         // console.log((pdfParser as any).getRawTextContent());
         parsedText = (pdfParser as any).getRawTextContent();
       });
 
-      pdfParser.loadPDF(tempFilePath);
+      // pdfParser.loadPDF(tempFilePath);
+      await new Promise((resolve, reject) => {
+        pdfParser.loadPDF(tempFilePath);
+        pdfParser.on("pdfParser_dataReady", resolve);
+        pdfParser.on("pdfParser_dataError", reject);
+      });
     } else {
-      console.log('Uploaded file is not in the expected format.');
-      return new NextResponse('Uploaded file is not in the expected format.', { status: 400 });
+      return new NextResponse("Uploaded file is not in the expected format.", {
+        status: 500,
+      });
+      // console.log('Uploaded file is not in the expected format.');
     }
   } else {
-    return new NextResponse('No files found.', { status: 404 });
+    // console.log('No files found.');
+    return new NextResponse("No File Found", { status: 404 });
   }
-  
+
   const response = new NextResponse(parsedText);
-  response.headers.set('FileName', fileName);
+  response.headers.set("FileName", fileName);
   return response;
 }

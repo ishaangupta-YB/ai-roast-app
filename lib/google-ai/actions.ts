@@ -14,10 +14,11 @@ export async function generate(prompt: string) {
   });
 
   (async () => {
-    const { textStream } = await streamText({
+    try {
+    const { textStream,usage } = await streamText({
       model: model,
       temperature: 1,
-      topP: 0.95,
+      topP: 0.95, 
       prompt: prompt,
     });
     
@@ -25,6 +26,14 @@ export async function generate(prompt: string) {
       stream.update(text);
     }
     stream.done();
+    console.log({usage})
+    // if (!usageMetadata.candidatesTokenCount) {
+    //   usageMetadata.candidatesTokenCount = 0; 
+    // }
+  } catch (error) {
+    console.error("Error in generating text:", error);
+    stream.error(error);
+  }
   })().then(() => {});
 
   return { output: stream.value };

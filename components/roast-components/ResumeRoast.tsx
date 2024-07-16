@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,14 +22,10 @@ import getResumePromptHelper from "@/lib/resume-roast/promptHelper";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { readStreamableValue } from "ai/rsc";
-import { generateResumeRoast } from "@/lib/google-ai/generateResumeRoastActions";
 import { MultiStepLoader } from "../ui/multi-step-loader";
 import { HoverBorderGradient } from "../ui/hover-border-gradient";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-// import FileUpload from "../FileUploader";
-import FileUpload from "../FileUpload";
-import axios from "axios";
+import FileUpload from "../FileUploader";
+import { generate } from "@/lib/google-ai/actions";
 
 const loadingStates = [
   { text: "Fetching Resume data..." },
@@ -53,23 +49,28 @@ export default function ResumeRoast() {
   const [parsedText, setParsedText] = useState("");
   const [open, setOpen] = useState(false);
 
-   
-
   const handleRoast = async () => {
     setLoading(true);
     setRoastResponse("");
-    if (!uploadedFile) {
+    if (!parsedText) {
       toast({
         variant: "destructive",
         title: "No file uploaded",
         description: "Please upload a resume file to proceed.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
+      setLoading(false);
       return;
     }
     try {
-      // const response = await fetchResumeData(uploadedFile);
-      const prompt = getResumePromptHelper(roastTone, roleType, languageType,parsedText);
+      if (!parsedText) throw new Error("Reading File Error");
+      const prompt = getResumePromptHelper(
+        roastTone,
+        roleType,
+        languageType,
+        parsedText
+      );
+      console.log({ prompt });
       await fetchOpenAIResponse(prompt);
     } catch (error) {
       console.log(error);
@@ -84,31 +85,8 @@ export default function ResumeRoast() {
     }
   };
 
-  const fetchResumeData = async (file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append("filepond", file);
-
-      const response = await axios.post("/api/resume-data", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (!response.data) throw new Error("Failed to fetch resume data");
-      return response.data;
-    } catch (error: any) {
-      if (error.response && error.response.status === 404) {
-        throw new Error("Invalid file type");
-      } else {
-        throw new Error("An error occurred while fetching the data");
-      }
-    }
-  };
-
   const fetchOpenAIResponse = async (prompt: string) => {
-    const { output } = await generateResumeRoast(prompt);
-
+    const { output } = await generate(prompt);
     for await (const delta of readStreamableValue(output!)) {
       setRoastResponse((currentGeneration) => `${currentGeneration}${delta}`);
     }
@@ -222,9 +200,11 @@ export default function ResumeRoast() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {/* <FileUpload onFileUpload={handleFileUpload} /> */}
-            <FileUpload setParsedText={setParsedText} 
-              />
+            <FileUpload
+              onFileUpload={handleFileUpload}
+              setParsedText={setParsedText}
+            />
+            {/* <FileUpload setParsedText={setParsedText}/> */}
           </div>
         </DialogContent>
       </Dialog>
@@ -241,12 +221,6 @@ export default function ResumeRoast() {
         <div className="mt-6">
           <h3 className="text-xl font-semibold">Roast Result</h3>
           <Textarea readOnly value={roastResponse} className="mt-2" rows={10} />
-        </div>
-      )}
-       {parsedText && (
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold">Parsed Resume Content</h3>
-          <p>{parsedText}</p>
         </div>
       )}
     </div>
