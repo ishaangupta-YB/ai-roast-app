@@ -61,8 +61,7 @@ export default function LeetcodeRoast() {
         roleType,
         leetcodeData,
         languageType
-      );
-      console.log(prompt)
+      ); 
       setProfileUrl(`https://leetcode.com/u/${username}/`);
       setAvatarUrl(leetcodeData.profile.avatar);
       await fetchOpenAIResponse(prompt);

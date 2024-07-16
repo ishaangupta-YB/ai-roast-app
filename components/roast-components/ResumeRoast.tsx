@@ -8,7 +8,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { constants } from "@/lib/constants";
-import axios from "axios";
 import {
   Select,
   SelectContent,
@@ -23,13 +22,14 @@ import getResumePromptHelper from "@/lib/resume-roast/promptHelper";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { readStreamableValue } from "ai/rsc";
-import { generate } from "@/lib/google-ai/actions";
+import { generateResumeRoast } from "@/lib/google-ai/generateResumeRoastActions";
 import { MultiStepLoader } from "../ui/multi-step-loader";
 import { HoverBorderGradient } from "../ui/hover-border-gradient";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Button } from "../ui/button";
-import FileUpload from "../FileUploader";
+// import FileUpload from "../FileUploader";
+import FileUpload from "../FileUpload";
+import axios from "axios";
 
 const loadingStates = [
   { text: "Fetching Resume data..." },
@@ -47,14 +47,13 @@ export default function ResumeRoast() {
   const [roastResponse, setRoastResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [generateImage, setGenerateImage] = useState(false);
+  //   const [generateImage, setGenerateImage] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (roastResponse) {
-      setLoading(false);
-    }
-  }, [roastResponse]);
+  const [parsedText, setParsedText] = useState("");
+  const [open, setOpen] = useState(false);
+
+   
 
   const handleRoast = async () => {
     setLoading(true);
@@ -69,30 +68,9 @@ export default function ResumeRoast() {
       return;
     }
     try {
-      const formData = new FormData();
-      formData.append("file", uploadedFile);
-      formData.append("roastTone", roastTone);
-      formData.append("roleType", roleType);
-      formData.append("languageType", languageType);
-      //   const resumeData = await fetchResumeData(username);
-
-      const response = await axios.post("/api/resume-data", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      if (!response) throw new Error("Some error occurred");
-      if (response.status !== 200) {
-        throw new Error("Some error occurred");
-      }
-      const resumeData = response.data;
-      //   const prompt = getResumePromptHelper(
-      //       roastTone,
-      //       roleType,
-      //       resumeData,
-      //       languageType
-      //     );
-      //   await fetchOpenAIResponse(prompt);
+      // const response = await fetchResumeData(uploadedFile);
+      const prompt = getResumePromptHelper(roastTone, roleType, languageType,parsedText);
+      await fetchOpenAIResponse(prompt);
     } catch (error) {
       console.log(error);
       toast({
@@ -106,16 +84,44 @@ export default function ResumeRoast() {
     }
   };
 
+  const fetchResumeData = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("filepond", file);
+
+      const response = await axios.post("/api/resume-data", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (!response.data) throw new Error("Failed to fetch resume data");
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        throw new Error("Invalid file type");
+      } else {
+        throw new Error("An error occurred while fetching the data");
+      }
+    }
+  };
+
   const fetchOpenAIResponse = async (prompt: string) => {
-    const { output } = await generate(prompt);
-    for await (const delta of readStreamableValue(output)) {
+    const { output } = await generateResumeRoast(prompt);
+
+    for await (const delta of readStreamableValue(output!)) {
       setRoastResponse((currentGeneration) => `${currentGeneration}${delta}`);
     }
   };
 
-  const handleFileUpload = (file: File) => {
-    setUploadedFile(file);
-    console.log({file}) 
+  const handleFileUpload = async (file: File) => {
+    setUploadedFile(() => {
+      return file;
+    });
+
+    setOpen(() => {
+      return false;
+    });
     toast({
       variant: "default",
       title: "File Uploaded",
@@ -190,17 +196,17 @@ export default function ResumeRoast() {
             </SelectContent>
           </Select>
         </div>
-        <div className="col-span-1 flex items-center space-x-4">
-          <Label htmlFor="generateImage">Generate Image</Label>
+        {/* <div className="col-span-1 flex items-center space-x-4">
+          <Label htmlFor="generateImage">Generate Meme Image</Label>
           <Switch
             id="generateImage"
             checked={generateImage}
             onCheckedChange={setGenerateImage}
           />
-        </div>
+        </div> */}
       </div>
-      <Dialog>
-        <DialogTrigger asChild >
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
           <HoverBorderGradient
             containerClassName="rounded-full shadow"
             as="button"
@@ -216,14 +222,16 @@ export default function ResumeRoast() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <FileUpload onFileUpload={handleFileUpload} />
+            {/* <FileUpload onFileUpload={handleFileUpload} /> */}
+            <FileUpload setParsedText={setParsedText} 
+              />
           </div>
         </DialogContent>
       </Dialog>
       <HoverBorderGradient
         onClick={handleRoast}
         aria-disabled={loading}
-        containerClassName="rounded-full"
+        containerClassName="rounded-full mt-6"
         as="button"
         className="dark:bg-black text-lg bg-white text-black dark:text-white flex items-center space-x-2"
       >
@@ -233,6 +241,12 @@ export default function ResumeRoast() {
         <div className="mt-6">
           <h3 className="text-xl font-semibold">Roast Result</h3>
           <Textarea readOnly value={roastResponse} className="mt-2" rows={10} />
+        </div>
+      )}
+       {parsedText && (
+        <div className="mt-6">
+          <h3 className="text-xl font-semibold">Parsed Resume Content</h3>
+          <p>{parsedText}</p>
         </div>
       )}
     </div>

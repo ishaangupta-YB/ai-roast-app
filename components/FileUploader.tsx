@@ -1,18 +1,16 @@
 "use client";
 
-import axios, { AxiosProgressEvent, CancelTokenSource } from "axios";
 import { File, UploadCloud, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Progress } from "./ui/progress";
-import {  useToast } from "./ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FileUploadProgress {
   progress: number;
   file: File;
-  source: CancelTokenSource | null;
 }
 
 const PdfColor = {
@@ -20,8 +18,11 @@ const PdfColor = {
   fillColor: "fill-blue-400",
 };
 
-export default function FileUpload({ onFileUpload }: { onFileUpload: (file: File) => void }) {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+export default function FileUpload({
+  onFileUpload,
+}: {
+  onFileUpload: (file: File) => void;
+}) {
   const [filesToUpload, setFilesToUpload] = useState<FileUploadProgress[]>([]);
   const { toast } = useToast();
 
@@ -36,157 +37,34 @@ export default function FileUpload({ onFileUpload }: { onFileUpload: (file: File
     return null;
   };
 
-  const onUploadProgress = (
-    progressEvent: AxiosProgressEvent,
-    file: File,
-    cancelSource: CancelTokenSource
-  ) => {
-    const progress = Math.round(
-      (progressEvent.loaded / (progressEvent.total ?? 0)) * 100
-    );
-
-    if (progress === 100) {
-      setUploadedFiles((prevUploadedFiles) => {
-        return [...prevUploadedFiles, file];
-      });
-
-      setFilesToUpload((prevUploadProgress) => {
-        return prevUploadProgress.filter((item) => item.file !== file);
-      });
-
-      onFileUpload(file);
-
-      return;
-    }
-
-    setFilesToUpload((prevUploadProgress) => {
-      return prevUploadProgress.map((item) => {
-        if (item.file.name === file.name) {
-          return {
-            ...item,
-            progress,
-            source: cancelSource,
-          };
-        } else {
-          return item;
-        }
-      });
-    });
-  };
-
-  const uploadFileToCloudinary = async (
-    formData: FormData,
-    onUploadProgress: (progressEvent: AxiosProgressEvent) => void,
-    cancelSource: CancelTokenSource
-  ) => {
-    return axios.post(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUD_NAME}/auto/upload`,
-      formData,
-      {
-        onUploadProgress,
-        cancelToken: cancelSource.token,
-      }
-    );
-  };
-
-
-  const uploadFile = async (
-    file: File,
-    onUploadProgress: (progressEvent: AxiosProgressEvent) => void,
-    cancelSource: CancelTokenSource
-  ) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    return axios.post(
-      `/api/upload`,
-      formData,
-      {
-        onUploadProgress,
-        cancelToken: cancelSource.token,
-      }
-    );
-  };
-
   const removeFile = (file: File) => {
     setFilesToUpload((prevUploadProgress) => {
       return prevUploadProgress.filter((item) => item.file !== file);
     });
-
-    setUploadedFiles((prevUploadedFiles) => {
-      return prevUploadedFiles.filter((item) => item !== file);
-    });
   };
 
-  // const onDrop = useCallback(async (acceptedFiles: File[]) => {
-  //   setFilesToUpload((prevUploadProgress) => {
-  //     return [
-  //       ...prevUploadProgress,
-  //       ...acceptedFiles.map((file) => {
-  //         return {
-  //           progress: 0,
-  //           file: file,
-  //           source: null,
-  //         };
-  //       }),
-  //     ];
-  //   });
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 1) {
+        toast({
+          variant: "destructive",
+          title: "Multiple files not allowed",
+          description: "Please upload only one PDF file.",
+        });
+        return;
+      }
 
-    // const fileUploadBatch = acceptedFiles.map((file) => {
-    //   const formData = new FormData();
-    //   formData.append("file", file);
-    //   formData.append(
-    //     "upload_preset",
-    //     process.env.NEXT_PUBLIC_UPLOAD_PRESET as string
-    //   );
-
-    //   const cancelSource = axios.CancelToken.source();
-    //   return uploadFileToCloudinary(
-    //     formData,
-    //     (progressEvent) => onUploadProgress(progressEvent, file, cancelSource),
-    //     cancelSource
-    //   );
-    // });
-
-    // try {
-    //   await Promise.all(fileUploadBatch);
-    //   alert("All files uploaded successfully");
-    // } catch (error) {
-    //   console.error("Error uploading files: ", error);
-    // }
-  // }, []);
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const fileUploadBatch = acceptedFiles.map((file) => {
-      const cancelSource = axios.CancelToken.source();
-
-      setFilesToUpload((prevUploadProgress) => [
-        ...prevUploadProgress,
-        {
-          progress: 0,
-          file: file,
-          source: cancelSource,
-        },
-      ]);
-
-      return uploadFile(
-        file,
-        (progressEvent) => onUploadProgress(progressEvent, file, cancelSource),
-        cancelSource
-      );
-    });
-
-    try {
-      await Promise.all(fileUploadBatch);
-      toast({
-        variant: "default",
-        title: "Success",
-        description: "All files uploaded successfully.",
-      });
-    } catch (error) {
-      console.error("Error uploading files: ", error);
-    }
-  }, []);
+      const file = acceptedFiles[0]; 
+      setFilesToUpload([{ file, progress: 100 }]); 
+      onFileUpload(file);
+      // toast({
+      //   variant: "default",
+      //   title: "File Uploaded",
+      //   description: `${file.name} has been uploaded successfully.`,
+      // });
+    },
+    [onFileUpload]
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -259,11 +137,7 @@ export default function FileUpload({ onFileUpload }: { onFileUpload: (file: File
                       </div>
                     </div>
                     <button
-                      onClick={() => {
-                        if (fileUploadProgress.source)
-                          fileUploadProgress.source.cancel("Upload cancelled");
-                        removeFile(fileUploadProgress.file);
-                      }}
+                      onClick={() => removeFile(fileUploadProgress.file)}
                       className="bg-red-500 text-white transition-all items-center justify-center cursor-pointer px-2 hidden group-hover:flex"
                     >
                       <X size={20} />
@@ -273,43 +147,6 @@ export default function FileUpload({ onFileUpload }: { onFileUpload: (file: File
               })}
             </div>
           </ScrollArea>
-        </div>
-      )}
-
-      {uploadedFiles.length > 0 && (
-        <div>
-          <p className="font-medium my-2 mt-6 text-muted-foreground text-sm">
-            Uploaded Files
-          </p>
-          <div className="space-y-2 pr-3">
-            {uploadedFiles.map((file) => {
-              return (
-                <div
-                  key={file.lastModified}
-                  className="flex justify-between gap-2 rounded-lg overflow-hidden border border-slate-100 group hover:pr-0 pr-2 hover:border-slate-300 transition-all"
-                >
-                  <div className="flex items-center flex-1 p-2">
-                    <div className="text-white">
-                      {getFileIconAndColor(file)?.icon}
-                    </div>
-                    <div className="w-full ml-2 space-y-1">
-                      <div className="text-sm flex justify-between">
-                        <p className="text-muted-foreground ">
-                          {file.name.slice(0, 25)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeFile(file)}
-                    className="bg-red-500 text-white transition-all items-center justify-center px-2 hidden group-hover:flex"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
     </div>
