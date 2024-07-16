@@ -1,12 +1,12 @@
-import React from 'react'
-import { TypewriterEffectSmoothDemo } from './TypewriterEffectSmoothDemo'
+import React from "react";
+import { TypewriterEffectSmoothDemo } from "./TypewriterEffectSmoothDemo";
 
 function HeroSection() {
   return (
     <div>
-      <TypewriterEffectSmoothDemo/>  
+      <TypewriterEffectSmoothDemo />
     </div>
-  )
+  );
 }
 
-export default HeroSection
+export default HeroSection;

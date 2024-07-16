@@ -77,7 +77,7 @@ const reviewList: ReviewProps[] = [
   },
 ];
 
-export const TestimonialSection = () => {
+export default function TestimonialSection() {
   return (
     <section id="testimonials" className="container py-12 sm:py-16">
       <div className="text-center mb-8">

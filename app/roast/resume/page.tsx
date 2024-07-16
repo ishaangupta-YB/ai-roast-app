@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { ContentLayout } from "@/components/DashBoardLayout/content-layout";
+import ResumeRoast from "@/components/roast-components/ResumeRoast";
 
 export default function Page() {
   return (
@@ -32,6 +33,7 @@ export default function Page() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb> 
+      <ResumeRoast/>
     </ContentLayout>
   );
 }

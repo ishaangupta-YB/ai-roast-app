@@ -13,7 +13,7 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import { BackgroundGradient } from "./ui/background-gradient";
 
-export const PricingSection = () => {
+export default function PricingSection()  {
   return (
     <section className="container py-24 sm:py-32">
       <h2 className="text-lg text-primary text-center mb-2 tracking-wider">

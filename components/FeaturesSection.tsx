@@ -2,7 +2,7 @@
 import { featureList } from "@/lib/feature-list";
 import { HoverEffect } from "./ui/card-hover-effect";
 
-export const FeaturesSection = () => {
+function FeaturesSection()  {
   return (
     <section id="features" className="container py-24 sm:py-32">
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
@@ -26,3 +26,4 @@ export const FeaturesSection = () => {
     </section>
   );
 };
+export default  FeaturesSection
