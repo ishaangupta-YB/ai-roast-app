@@ -1,9 +1,13 @@
-import Link from "next/link";
-import Image from "next/image";
+'use client'
+import { useAuth } from '@clerk/nextjs';
+import HistoryTable from "@/components/HistoryTable";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function PlaceholderContent() {
+  const { userId } = useAuth();
   return (
     <Card className="rounded-lg border-none mt-6">
       <CardContent className="p-6">
@@ -16,6 +20,21 @@ export default function PlaceholderContent() {
               height={500}
               priority
             />  */}
+            <div>
+              <h1>Your Roast History</h1>
+              {userId ? (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="primary">View History</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <HistoryTable />
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                <p>Please log in to view your history.</p>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

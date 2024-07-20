@@ -6,7 +6,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import PlaceholderContent from "@/components/DashBoardLayout/placeholder-content";
 import { ContentLayout } from "@/components/DashBoardLayout/content-layout";

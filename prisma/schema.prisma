@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,7 +15,7 @@ model User {
   photo             String?
   planId            Int               @default(1)
   creditBalance     Int               @default(10)
-  customerId        String?           @unique // Stripe customer ID, this will be important when we need to delete the subscription
+  customerId        String?           @unique
   githubHistories   GithubHistory[]
   // linkedinHistories LinkedinHistory[]
   leetcodeHistories LeetcodeHistory[]
@@ -35,8 +29,10 @@ model GithubHistory {
   id         String   @id @default(cuid())
   userId     String
   createdAt  DateTime @default(now())
-  inputType  String
-  inputData  String
+  username   String
+  roastTone  String
+  roleType   String
+  language   String
   outputData String
   user       User     @relation(fields: [userId], references: [id])
 }
@@ -45,8 +41,10 @@ model GithubHistory {
 //   id         String   @id @default(cuid())
 //   userId     String
 //   createdAt  DateTime @default(now())
-//   inputType  String
-//   inputData  String
+//   username   String
+//   roastTone  String
+//   roleType   String
+//   language   String
 //   outputData String
 //   user       User     @relation(fields: [userId], references: [id])
 // }
@@ -55,8 +53,10 @@ model LeetcodeHistory {
   id         String   @id @default(cuid())
   userId     String
   createdAt  DateTime @default(now())
-  inputType  String
-  inputData  String
+  username   String
+  roastTone  String
+  roleType   String
+  language   String
   outputData String
   user       User     @relation(fields: [userId], references: [id])
 }
@@ -65,8 +65,10 @@ model ResumeHistory {
   id         String   @id @default(cuid())
   userId     String
   createdAt  DateTime @default(now())
-  inputType  String
-  inputData  String
+  roastTone  String
+  roleType   String
+  language   String
+  resumeFile String?
   outputData String
   user       User     @relation(fields: [userId], references: [id])
 }
