@@ -6,20 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Icons } from '@/components/ui/icons';
-import { cn } from '@/lib/utils';
+import { Icons } from '@/components/ui/icons'; 
 
 export default function SignInPage() {
   return (
     <div className="grid w-full grow items-center px-4 sm:justify-center">
-      <SignIn.Root>
+      <SignIn.Root 
+        path='/sign-in'
+        routing='path'
+      >
         <Clerk.Loading>
           {(isGlobalLoading) => (
             <>
               <SignIn.Step name="start">
                 <Card className="w-full sm:w-96">
                   <CardHeader>
-                    <CardTitle>Sign in to Acme Co</CardTitle>
+                    <CardTitle>Sign in to Roast App</CardTitle>
                     <CardDescription>Welcome back! Please sign in to continue</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-y-4">
@@ -61,7 +63,7 @@ export default function SignInPage() {
                       or
                     </p>
                     <Clerk.Field name="identifier" className="space-y-2">
-                      <Clerk.Label asChild>
+                      <Clerk.Label asChild> 
                         <Label>Email address</Label>
                       </Clerk.Label>
                       <Clerk.Input type="email" required asChild>

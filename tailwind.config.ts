@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
-
-const svgToDataUri = require("mini-svg-data-uri");
+import { fontFamily } from "tailwindcss/defaultTheme";
+import plugin from "tailwindcss/plugin";
+import svgToDataUri from "mini-svg-data-uri";
 const {
   default: flattenColorPalette,
 } = require("tailwindcss/lib/util/flattenColorPalette");
@@ -63,6 +64,9 @@ const config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+      },
       keyframes: {
         scroll: {
           to: {
@@ -89,21 +93,26 @@ const config = {
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
     },
   },
-  plugins: [require("tailwindcss-animate"), addVariablesForColors,
-    function ({ matchUtilities, theme }: any) {
+  plugins: [
+    require("tailwindcss-animate"),
+    addVariablesForColors,
+    plugin(function ({ matchUtilities, theme }) {
       matchUtilities(
         {
-          "bg-dot-thick": (value: any) => ({
+          'bg-grid-pattern': (value) => ({
             backgroundImage: `url("${svgToDataUri(
-              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="2.5"></circle></svg>`
-            )}")`,
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="${value}" stroke-dasharray="1 1" transform="scale(1, 1)"><path d="M0 .5H31.5V32"/></svg>`
+            )}")`
           }),
         },
-        { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
-      );
-    },
+        { values: flattenColorPalette(theme('backgroundColor')), type: 'color' }
+      )
+    }),
   ],
 } satisfies Config;
 

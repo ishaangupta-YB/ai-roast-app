@@ -18,7 +18,7 @@ export enum Tones {
   Vulgar = "vulgar",
 }
 
-export const safetySettings: Array<{
+export const safetySettingsValues: Array<{
   category: HarmCategory;
   threshold: HarmBlockThreshold;
 }> = [
@@ -52,5 +52,5 @@ export const constants = {
   Tones,
   Roles,
   Languages,
-  safetySettings,
+  safetySettingsValues,
 };

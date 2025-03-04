@@ -31,7 +31,7 @@ export function Menu({ isOpen }: MenuProps) {
     if (isLoaded && isSignedIn) {
       setCredits({ used: 50, total: 100 });
     }
-  }, [isSignedIn, credits]);
+  }, [isLoaded, isSignedIn]);
 
   // if (!isLoaded) {
   //   return <div>Loading...</div>;

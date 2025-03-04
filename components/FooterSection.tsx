@@ -1,6 +1,9 @@
+"use client";
+
 import { Separator } from "@/components/ui/separator";
 import { FlameKindling } from "lucide-react";
 import Link from "next/link";
+import { LinkPreview } from "./ui/link-preview";
 
 export default function FooterSection() {
   return (
@@ -40,8 +43,6 @@ export default function FooterSection() {
             </div>
           </div>
 
-           
-
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-lg">Help</h3>
             <div>
@@ -62,24 +63,21 @@ export default function FooterSection() {
               </Link>
             </div>
           </div>
-
-         
         </div>
 
         <Separator className="my-6" />
         <section className="">
           <h3 className="">
             &copy; 2024 Designed and developed by
-            <Link
-              target="_blank"
-              href="https://github.com/ishaangupta-yb"
+            <LinkPreview
+              url="https://github.com/ishaangupta-yb"
               className="text-primary transition-all border-primary hover:border-b-2 ml-1"
             >
               Ishaan Gupta
-            </Link>
+            </LinkPreview>{" "}
           </h3>
         </section>
       </div>
     </footer>
   );
-};
+}

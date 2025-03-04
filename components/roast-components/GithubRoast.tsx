@@ -110,12 +110,21 @@ export default function GithubRoast() {
   };
 
   const fetchOpenAIResponse = async (prompt: string) => {
-    const { output } = await generate(prompt);
-    for await (const delta of readStreamableValue(output)) {
-      setRoastResponse((currentGeneration) => `${currentGeneration}${delta}`);
+    try {
+      const { output } = await generate(prompt);
+      for await (const delta of readStreamableValue(output)) {
+        setRoastResponse((currentGeneration) => `${currentGeneration}${delta}`);
+      }
+    } catch (error) {
+      console.error("Error generating roast:", error);
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "AI Generation Error",
+        description: error instanceof Error ? error.message : "Failed to generate roast. Please try again.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
     }
-    // const { output } = await generate(prompt);
-    // setRoastResponse(output)
   };
 
   return (
