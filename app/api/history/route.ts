@@ -6,6 +6,7 @@ import {
   createHistory,
   deleteHistory,
 } from "@/services/serverActions";
+import { ServerActionError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
   const { userId } = getAuth(request as any);
@@ -28,7 +29,8 @@ export async function GET(request: NextRequest) {
     const histories = await getAllHistories(userId);
     return NextResponse.json(histories);
   } catch (error) {
-    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+    const statusCode = error instanceof ServerActionError ? error.statusCode : 500;
+    return NextResponse.json({ message: (error as Error).message }, { status: statusCode });
   }
 }
 
@@ -51,17 +53,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { inputType, inputData, outputData } = body;
+    const { inputType, inputData, outputData, username, roastTone, roleType, language } = body;
     
     const history = await createHistory(type as HistoryTable, {
       userId,
-      inputType,
-      inputData,
-      outputData,
+      inputType: inputType || "",
+      inputData: inputData || "",
+      outputData: outputData || "",
+      username: username || "",
+      roastTone: roastTone || "FRIENDLY",
+      roleType: roleType || "GENERAL",
+      language: language || "ENGLISH",
     } as any);
+    
     return NextResponse.json(history, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+    const statusCode = error instanceof ServerActionError ? error.statusCode : 500;
+    return NextResponse.json({ message: (error as Error).message }, { status: statusCode });
   }
 }
 
@@ -89,6 +97,7 @@ export async function DELETE(request: NextRequest) {
     await deleteHistory(type as HistoryTable, id);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+    const statusCode = error instanceof ServerActionError ? error.statusCode : 500;
+    return NextResponse.json({ message: (error as Error).message }, { status: statusCode });
   }
 }
