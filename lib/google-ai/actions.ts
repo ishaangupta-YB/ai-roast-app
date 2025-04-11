@@ -16,31 +16,17 @@ export async function generate(prompt: string) {
 
   const stream = createStreamableValue();
 
-  // Updated to use Gemini-1.5-flash instead of gemini-pro
-  // const model = google("models/gemini-1.5-flash", {
-  //   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-  //   safetySettings: safetySettings,
-  // });
-
-  const apiKey = process.env.GEMINI_API_KEY;
-  const genAI = new GoogleGenerativeAI(String(apiKey));
-
-  // Convert our safety settings values to the proper types expected by the library
-  // const safetySettings = safetySettingsValues.map(
-  //   (setting: { category: string; threshold: string }) => ({
-  //     category:
-  //       HarmCategory[
-  //         setting.category.replace(
-  //           "HARM_CATEGORY_",
-  //           ""
-  //         ) as keyof typeof HarmCategory
-  //       ],
-  //     threshold:
-  //       HarmBlockThreshold[
-  //         setting.threshold as keyof typeof HarmBlockThreshold
-  //       ],
-  //   })
-  // );
+  // Get API key from environment variables - ensure it's set in your .env.local file
+  // and on Vercel environment variables
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_API_KEY;
+  
+  if (!apiKey) {
+    console.error("Missing GEMINI_API_KEY environment variable");
+    stream.error(new Error("API key not configured"));
+    return { output: stream.value };
+  }
+  
+  const genAI = new GoogleGenerativeAI(apiKey);
 
   const safetySettings = [
     {
