@@ -72,25 +72,27 @@ export async function generate(prompt: string) {
 
   (async () => {
     try {
-      const { textStream, usage } = await streamText({
-        model: model,
-        temperature: 0.8, // Lower temperature for more consistent and focused responses
-        topP: 0.95,
-        prompt: prompt,
-      });
+      // The streamText function expects a LanguageModelV1 type, but we have a GenerativeModel
+      // const { textStream, usage } = await streamText({
+      //   model,
+      //   temperature: 0.8, // Lower temperature for more consistent and focused responses
+      //   topP: 0.95,
+      //   prompt: prompt,
+      // });
 
-      for await (const text of textStream) {
-        stream.update(text);
-      }
-
-      // const result = await model.generateContentStream(prompt);
-
-      // for await (const chunk of result.stream) {
-      //   const text = chunk.text();
-      //   if (text) {
-      //     stream.update(text);
-      //   }
+      // for await (const text of textStream) {
+      //   stream.update(text);
       // }
+
+      // Using the native Google AI method instead
+      const result = await model.generateContentStream(prompt);
+
+      for await (const chunk of result.stream) {
+        const text = chunk.text();
+        if (text) {
+          stream.update(text);
+        }
+      }
 
       stream.done();
     } catch (error) {

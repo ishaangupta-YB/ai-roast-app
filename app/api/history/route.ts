@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import {
   HistoryTable,
@@ -7,53 +7,88 @@ import {
   deleteHistory,
 } from "@/services/serverActions";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { userId } = getAuth(req);
-  const { type } = req.query;
-
+export async function GET(request: NextRequest) {
+  const { userId } = getAuth(request as any);
+  
   if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+
+  const searchParams = request.nextUrl.searchParams;
+  const type = searchParams.get("type");
 
   if (
     typeof type !== "string" ||
     !["githubHistory", "leetcodeHistory", "resumeHistory"].includes(type)
   ) {
-    return res.status(400).json({ message: "Invalid type" });
+    return NextResponse.json({ message: "Invalid type" }, { status: 400 });
   }
 
-  if (req.method === "GET") {
+  try {
     const histories = await getAllHistories(userId);
-    return res.json(histories);
+    return NextResponse.json(histories);
+  } catch (error) {
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const { userId } = getAuth(request as any);
+  
+  if (!userId) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  if (req.method === "POST") {
-    const { inputType, inputData, outputData } = req.body;
-    try {
-      const history = await createHistory(type as HistoryTable, {
-        userId,
-        inputType,
-        inputData,
-        outputData,
-      });
-      return res.status(201).json(history);
-    } catch (error) {
-      return res.status(500).json({ message: (error as Error).message });
-    }
+  const searchParams = request.nextUrl.searchParams;
+  const type = searchParams.get("type");
+
+  if (
+    typeof type !== "string" ||
+    !["githubHistory", "leetcodeHistory", "resumeHistory"].includes(type)
+  ) {
+    return NextResponse.json({ message: "Invalid type" }, { status: 400 });
   }
 
-  if (req.method === "DELETE") {
-    const { id } = req.body;
-    try {
-      await deleteHistory(type as HistoryTable, id);
-      return res.status(204).end();
-    } catch (error) {
-      return res.status(500).json({ message: (error as Error).message });
-    }
+  try {
+    const body = await request.json();
+    const { inputType, inputData, outputData } = body;
+    
+    const history = await createHistory(type as HistoryTable, {
+      userId,
+      inputType,
+      inputData,
+      outputData,
+    } as any);
+    return NextResponse.json(history, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const { userId } = getAuth(request as any);
+  
+  if (!userId) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  return res.status(405).json({ message: "Method Not Allowed" });
+  const searchParams = request.nextUrl.searchParams;
+  const type = searchParams.get("type");
+
+  if (
+    typeof type !== "string" ||
+    !["githubHistory", "leetcodeHistory", "resumeHistory"].includes(type)
+  ) {
+    return NextResponse.json({ message: "Invalid type" }, { status: 400 });
+  }
+
+  try {
+    const body = await request.json();
+    const { id } = body;
+    
+    await deleteHistory(type as HistoryTable, id);
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+  }
 }
